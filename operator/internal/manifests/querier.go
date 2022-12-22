@@ -126,6 +126,11 @@ func NewQuerierDeployment(opts Options) *appsv1.Deployment {
 	l := ComponentLabels(LabelQuerierComponent, opts.Name)
 	a := commonAnnotations(opts.ConfigSHA1, opts.CertRotationRequiredAt)
 
+	replicas := opts.Stack.Template.Querier.Replicas
+	if opts.HPADesiredReplicas != 0 {
+		replicas = opts.HPADesiredReplicas
+	}
+
 	return &appsv1.Deployment{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Deployment",
@@ -136,7 +141,7 @@ func NewQuerierDeployment(opts Options) *appsv1.Deployment {
 			Labels: l,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: pointer.Int32Ptr(opts.Stack.Template.Querier.Replicas),
+			Replicas: pointer.Int32Ptr(replicas),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: labels.Merge(l, GossipLabels()),
 			},

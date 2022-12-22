@@ -24,7 +24,9 @@ import (
 
 	"github.com/ViaQ/logerr/v2/kverrors"
 	"github.com/go-logr/logr"
+	autoscalingv2 "k8s.io/api/autoscaling/v2"
 	corev1 "k8s.io/api/core/v1"
+
 	rbacv1 "k8s.io/api/rbac/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -316,6 +318,14 @@ func CreateOrUpdateLokiStack(
 		ll.Error(optErr, "failed to conform options to tls profile settings")
 		return optErr
 	}
+
+	var hpa autoscalingv2.HorizontalPodAutoscaler
+	key = client.ObjectKey{Name: "keda-hpa-querier-scaledobject", Namespace: "openshift-logging"}
+	if err = k.Get(ctx, key, &hpa); err != nil {
+		ll.Error(err, "failed to lookup HPA")
+	}
+
+	opts.HPADesiredReplicas = hpa.Status.DesiredReplicas
 
 	objects, err := manifests.BuildAll(opts)
 	if err != nil {
