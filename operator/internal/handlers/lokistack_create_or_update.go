@@ -322,10 +322,15 @@ func CreateOrUpdateLokiStack(
 	var hpa autoscalingv2.HorizontalPodAutoscaler
 	key = client.ObjectKey{Name: "keda-hpa-querier-scaledobject", Namespace: "openshift-logging"}
 	if err = k.Get(ctx, key, &hpa); err != nil {
-		ll.Error(err, "failed to lookup HPA")
+		ll.Error(err, "failed to lookup querier HPA")
 	}
+	opts.HPAQuerierDesiredReplicas = hpa.Status.DesiredReplicas
 
-	opts.HPADesiredReplicas = hpa.Status.DesiredReplicas
+	key = client.ObjectKey{Name: "keda-hpa-ingester-scaledobject", Namespace: "openshift-logging"}
+	if err = k.Get(ctx, key, &hpa); err != nil {
+		ll.Error(err, "failed to lookup ingester HPA")
+	}
+	opts.HPAIngesterDesiredReplicas = hpa.Status.DesiredReplicas
 
 	objects, err := manifests.BuildAll(opts)
 	if err != nil {

@@ -136,6 +136,12 @@ func NewIngesterStatefulSet(opts Options) *appsv1.StatefulSet {
 
 	l := ComponentLabels(LabelIngesterComponent, opts.Name)
 	a := commonAnnotations(opts.ConfigSHA1, opts.CertRotationRequiredAt)
+
+	replicas := opts.Stack.Template.Ingester.Replicas
+	if opts.HPAIngesterDesiredReplicas != 0 {
+		replicas = opts.HPAIngesterDesiredReplicas
+	}
+
 	return &appsv1.StatefulSet{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "StatefulSet",
@@ -148,7 +154,7 @@ func NewIngesterStatefulSet(opts Options) *appsv1.StatefulSet {
 		Spec: appsv1.StatefulSetSpec{
 			PodManagementPolicy:  appsv1.OrderedReadyPodManagement,
 			RevisionHistoryLimit: pointer.Int32Ptr(10),
-			Replicas:             pointer.Int32Ptr(opts.Stack.Template.Ingester.Replicas),
+			Replicas:             pointer.Int32Ptr(replicas),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: labels.Merge(l, GossipLabels()),
 			},

@@ -127,8 +127,8 @@ func NewQuerierDeployment(opts Options) *appsv1.Deployment {
 	a := commonAnnotations(opts.ConfigSHA1, opts.CertRotationRequiredAt)
 
 	replicas := opts.Stack.Template.Querier.Replicas
-	if opts.HPADesiredReplicas != 0 {
-		replicas = opts.HPADesiredReplicas
+	if opts.HPAQuerierDesiredReplicas != 0 {
+		replicas = opts.HPAQuerierDesiredReplicas
 	}
 
 	return &appsv1.Deployment{

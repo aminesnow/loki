@@ -38,7 +38,9 @@ type Options struct {
 
 	TLSProfile TLSProfileSpec
 
-	HPADesiredReplicas int32
+	HPAQuerierDesiredReplicas     int32
+	HPAIngesterDesiredReplicas    int32
+	HPADistributorDesiredReplicas int32
 }
 
 // Tenants contains the configuration per tenant and secrets for authn/authz.
