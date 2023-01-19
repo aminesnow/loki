@@ -332,6 +332,12 @@ func CreateOrUpdateLokiStack(
 	}
 	opts.HPAIngesterDesiredReplicas = hpa.Status.DesiredReplicas
 
+	key = client.ObjectKey{Name: "keda-hpa-distributor-scaledobject", Namespace: "openshift-logging"}
+	if err = k.Get(ctx, key, &hpa); err != nil {
+		ll.Error(err, "failed to lookup ingester HPA")
+	}
+	opts.HPADistributorDesiredReplicas = hpa.Status.DesiredReplicas
+
 	objects, err := manifests.BuildAll(opts)
 	if err != nil {
 		ll.Error(err, "failed to build manifests")
